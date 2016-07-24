@@ -9,6 +9,7 @@ AS = i686-elf-as
 QEMU = qemu-system-i386
 
 CFLAGS = -ffreestanding -O2 -Wall -Wextra
+CPPFLAGS = -Iinclude
 LDFLAGS = -T linker.ld -ffreestanding -O2 -nostdlib
 LDLIBS = -lgcc
 
@@ -30,13 +31,15 @@ $(OS_ISO): $(OS_BIN) grub.cfg
 	cp grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
 	grub-mkrescue -o $(OS_ISO) $(ISO_DIR)
 
-OBJS = boot.o kernel.o
+OBJS = boot.o kernel.o screen.o
+
+$(OBJS): include/*.h
 
 $(OS_BIN): $(OBJS) linker.ld
 	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 %.o: %.s
 	$(AS) -o $@ $<
